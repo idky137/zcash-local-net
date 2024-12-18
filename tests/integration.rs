@@ -411,7 +411,7 @@ async fn lightwalletd_zebrad_basic_send() {
     local_net.validator().generate_blocks(100).await.unwrap();
     faucet.do_sync(false).await.unwrap();
     faucet.quick_shield().await.unwrap();
-    local_net.validator().generate_blocks(100).await.unwrap();
+    local_net.validator().generate_blocks(1).await.unwrap();
     faucet.do_sync(false).await.unwrap();
 
     from_inputs::quick_send(
