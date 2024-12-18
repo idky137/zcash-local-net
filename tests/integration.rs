@@ -281,7 +281,7 @@ async fn zainod_zebrad_basic_send() {
     .await;
 
     let lightclient_dir = tempfile::tempdir().unwrap();
-    let (faucet, _recipient) = client::build_lightclients(
+    let (faucet, recipient) = client::build_lightclients(
         lightclient_dir.path().to_path_buf(),
         local_net.indexer().port(),
     )
@@ -289,38 +289,35 @@ async fn zainod_zebrad_basic_send() {
 
     local_net.validator().generate_blocks(100).await.unwrap();
     faucet.do_sync(false).await.unwrap();
-    dbg!(faucet.do_balance().await);
     faucet.quick_shield().await.unwrap();
     local_net.validator().generate_blocks(1).await.unwrap();
     faucet.do_sync(false).await.unwrap();
-    dbg!(faucet.do_balance().await);
 
-    // faucet.do_sync(false).await.unwrap();
-    // from_inputs::quick_send(
-    //     &faucet,
-    //     vec![(
-    //         &get_base_address(&recipient, PoolType::Shielded(ShieldedProtocol::Orchard)).await,
-    //         100_000,
-    //         None,
-    //     )],
-    // )
-    // .await
-    // .unwrap();
-    // local_net.validator().generate_blocks(1).await.unwrap();
-    // faucet.do_sync(false).await.unwrap();
-    // recipient.do_sync(false).await.unwrap();
+    from_inputs::quick_send(
+        &faucet,
+        vec![(
+            &get_base_address(&recipient, PoolType::Shielded(ShieldedProtocol::Orchard)).await,
+            100_000,
+            None,
+        )],
+    )
+    .await
+    .unwrap();
+    local_net.validator().generate_blocks(1).await.unwrap();
+    faucet.do_sync(false).await.unwrap();
+    recipient.do_sync(false).await.unwrap();
 
-    // let recipient_balance = recipient.do_balance().await;
-    // assert_eq!(recipient_balance.verified_orchard_balance, Some(100_000));
+    let recipient_balance = recipient.do_balance().await;
+    assert_eq!(recipient_balance.verified_orchard_balance, Some(100_000));
 
-    // local_net.validator().print_stdout();
-    // local_net.validator().print_stderr();
-    // local_net.indexer().print_stdout();
-    // local_net.indexer().print_stderr();
-    // println!("faucet balance:");
-    // println!("{:?}\n", faucet.do_balance().await);
-    // println!("recipient balance:");
-    // println!("{:?}\n", recipient_balance);
+    local_net.validator().print_stdout();
+    local_net.validator().print_stderr();
+    local_net.indexer().print_stdout();
+    local_net.indexer().print_stderr();
+    println!("faucet balance:");
+    println!("{:?}\n", faucet.do_balance().await);
+    println!("recipient balance:");
+    println!("{:?}\n", recipient_balance);
 }
 
 #[tokio::test]
@@ -413,17 +410,9 @@ async fn lightwalletd_zebrad_basic_send() {
 
     local_net.validator().generate_blocks(100).await.unwrap();
     faucet.do_sync(false).await.unwrap();
-    dbg!(faucet.do_balance().await);
-
     faucet.quick_shield().await.unwrap();
     local_net.validator().generate_blocks(100).await.unwrap();
     faucet.do_sync(false).await.unwrap();
-    dbg!(faucet.do_balance().await);
-
-    local_net.validator().print_stdout();
-    local_net.validator().print_stderr();
-    local_net.indexer().print_stdout();
-    local_net.indexer().print_stderr();
 
     from_inputs::quick_send(
         &faucet,
@@ -435,18 +424,17 @@ async fn lightwalletd_zebrad_basic_send() {
     )
     .await
     .unwrap();
-
-    local_net.validator().generate_blocks(100).await.unwrap();
+    local_net.validator().generate_blocks(1).await.unwrap();
     faucet.do_sync(false).await.unwrap();
     recipient.do_sync(false).await.unwrap();
 
     let recipient_balance = recipient.do_balance().await;
     assert_eq!(recipient_balance.verified_orchard_balance, Some(100_000));
 
-    // local_net.validator().print_stdout();
-    // local_net.validator().print_stderr();
-    // local_net.indexer().print_stdout();
-    // local_net.indexer().print_stderr();
+    local_net.validator().print_stdout();
+    local_net.validator().print_stderr();
+    local_net.indexer().print_stdout();
+    local_net.indexer().print_stderr();
     println!("faucet balance:");
     println!("{:?}\n", faucet.do_balance().await);
     println!("recipient balance:");
